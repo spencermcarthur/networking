@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "websocketclient.hpp"
+#include "WebSocketClient.hpp"
 
 class WebSocketClientTest : public ::testing::Test {
 protected:

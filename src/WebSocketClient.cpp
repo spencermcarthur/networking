@@ -1,4 +1,4 @@
-#include "websocketclient.hpp"
+#include "WebSocketClient.hpp"
 
 #include <iostream>
 #include <mutex>
