@@ -4,6 +4,16 @@ project(networking)
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_compile_options(-Wall -Wextra)
+message(STATUS "Configuration: ${CMAKE_BUILD_TYPE}")
+
+if("${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+    add_compile_options(-ggdb)
+    add_compile_definitions(DEBUG=TRUE)
+else()
+    add_compile_options(-O3)
+endif()
+
 find_package(Threads REQUIRED COMPONENTS Threads)
 find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 
