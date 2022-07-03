@@ -9,12 +9,20 @@ WebSocketClient::WebSocketClient()
     m_sslCtx.set_default_verify_paths();
 }
 
-bool WebSocketClient::connect(const std::string& host,
-                              const uint16_t& port,
-                              const std::string& path) {
+bool WebSocketClient::connect(const std::string& host, const uint16_t& port, const std::string& path) {
+    boost::beast::error_code ec;
     try {
-        auto const results = m_resolver.resolve(host, std::to_string(port));  // resolve domain name
-        auto ep = net::connect(beast::get_lowest_layer(m_ws), results);       // connect to IP address
+        auto const results = m_resolver.resolve(host, std::to_string(port), ec);  // resolve domain name
+        if (ec) {
+            std::cerr << "Error resolving domain name: " << ec.message() << std::endl;
+            return false;
+        }
+
+        auto ep = net::connect(beast::get_lowest_layer(m_ws), results, ec);  // connect to IP address
+        if (ec) {
+            std::cerr << "Error connecting to resolved address: " << ec.message() << std::endl;
+            return false;
+        }
 
         // set SNI hostname
         if (!SSL_set_tlsext_host_name(m_ws.next_layer().native_handle(), host.c_str()))
@@ -25,7 +33,12 @@ bool WebSocketClient::connect(const std::string& host,
                 "Failed to set SNI Hostname");
 
         std::string hostPort = host + ":" + std::to_string(ep.port());
-        m_ws.next_layer().handshake(ssl::stream_base::client);  // SSL handshake
+        m_ws.next_layer().handshake(ssl::stream_base::client, ec);  // SSL handshake
+        if (ec) {
+            std::cerr << "Error completing SSL handshake: " << ec.message() << std::endl;
+            return false;
+        }
+
         // set User-Agent field in WebSocket upgrade request
         m_ws.set_option(websocket::stream_base::decorator(
             [](websocket::request_type& req) {
@@ -34,7 +47,11 @@ bool WebSocketClient::connect(const std::string& host,
                             " websocket-client-coro");
             }));
 
-        m_ws.handshake(host, path);
+        m_ws.handshake(host, path, ec);  // WebSocket handshake
+        if (ec) {
+            std::cerr << "Error completing WebSocket handshake: " << ec.message() << std::endl;
+            return false;
+        }
 
     } catch (std::exception const& e) {
         std::cerr << "Error: " << e.what() << std::endl;
@@ -48,7 +65,7 @@ bool WebSocketClient::disconnect() {
     beast::error_code ec;
     m_ws.close(websocket::close_code::normal, ec);
 
-    if (ec) {
+    if (net::ssl::error::stream_truncated != ec && ec) {
         std::cerr << "Error: " << ec.message() << std::endl;
         return false;
     }
