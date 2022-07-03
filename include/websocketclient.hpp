@@ -22,7 +22,7 @@ class WebSocketClient
 public:
     WebSocketClient();
 
-    bool connect(const std::string& host, const uint16_t& port, const std::string& path = "/");
+    bool connect(const std::string& host, const uint16_t& port = 443, const std::string& path = "/");
     bool disconnect();
 
     bool send(const std::string& message);
