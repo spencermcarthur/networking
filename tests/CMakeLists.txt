@@ -6,7 +6,7 @@ find_package(GTest REQUIRED)
 
 enable_testing()
 
-add_executable(test_websocketclient EXCLUDE_FROM_ALL test_websocketclient.cpp)
+add_executable(test_websocketclient test_websocketclient.cpp)
 target_include_directories(test_websocketclient PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(test_websocketclient websocket gtest)
 add_test(NAME test_websocketclient COMMAND test_websocketclient)
