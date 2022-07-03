@@ -11,6 +11,7 @@ WebSocketClient::WebSocketClient()
 
 bool WebSocketClient::connect(const std::string& host, const uint16_t& port, const std::string& path) {
     boost::beast::error_code ec;
+
     try {
         auto const results = m_resolver.resolve(host, std::to_string(port), ec);  // resolve domain name
         if (ec) {
@@ -63,6 +64,7 @@ bool WebSocketClient::connect(const std::string& host, const uint16_t& port, con
 
 bool WebSocketClient::disconnect() {
     beast::error_code ec;
+
     m_ws.close(websocket::close_code::normal, ec);
 
     if (net::ssl::error::stream_truncated != ec && ec) {
@@ -75,11 +77,12 @@ bool WebSocketClient::disconnect() {
 
 bool WebSocketClient::send(const std::string& message) {
     std::lock_guard<std::mutex> _(m_sendMtx);
-    beast::error_code ec;
+    m_sendErrCode.clear();
 
-    m_ws.write(net::buffer(message), ec);
-    if (ec) {
-        std::cerr << "Error: " << ec.message() << std::endl;
+    m_ws.write(net::buffer(message), m_sendErrCode);
+
+    if (m_sendErrCode) {
+        std::cerr << "Error: " << m_sendErrCode.message() << std::endl;
         return false;
     }
 
@@ -88,15 +91,44 @@ bool WebSocketClient::send(const std::string& message) {
 
 bool WebSocketClient::recv(std::string& message) {
     std::lock_guard<std::mutex> _(m_recvMtx);
-    beast::error_code ec;
-
+    m_recvErrCode.clear();
     m_recvBuffer.clear();
-    m_ws.read(m_recvBuffer, ec);
-    if (ec) {
-        std::cerr << "Error: " << ec.message() << std::endl;
+
+    m_ws.read(m_recvBuffer, m_recvErrCode);
+
+    if (m_recvErrCode) {
+        std::cerr << "Error: " << m_recvErrCode.message() << std::endl;
         return false;
     }
 
     message = beast::buffers_to_string(m_recvBuffer.data());
+    return true;
+}
+
+bool WebSocketClient::ping(const std::string& message) {
+    std::lock_guard<std::mutex> _(m_pingMtx);
+    m_pingErrCode.clear();
+
+    m_ws.ping(websocket::ping_data(message), m_pingErrCode);
+
+    if (m_pingErrCode) {
+        std::cerr << "Error pinging: " << m_pingErrCode.message() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool WebSocketClient::pong(const std::string& message) {
+    std::lock_guard<std::mutex> _(m_pongMtx);
+    m_pongErrCode.clear();
+
+    m_ws.pong(websocket::ping_data(message), m_pongErrCode);
+
+    if (m_pongErrCode) {
+        std::cerr << "Error ponging: " << m_pongErrCode.message() << std::endl;
+        return false;
+    }
+
     return true;
 }
