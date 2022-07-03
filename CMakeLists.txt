@@ -10,3 +10,6 @@ target_include_directories(websocket PUBLIC ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(websocket PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
 
 add_subdirectory(tests)
+
+install(TARGETS websocket DESTINATION lib)
+install(FILES include/websocketclient.hpp DESTINATION include/networking)
