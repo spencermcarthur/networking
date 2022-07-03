@@ -1,2 +1,2 @@
 # networking
-Lightweight C++ HTTP and WebSocket library build on Boost Beast
+Lightweight C++ HTTP and WebSocket library built on Boost Beast
