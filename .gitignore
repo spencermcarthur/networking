@@ -35,3 +35,6 @@
 build/
 Release/
 Debug/
+
+# Misc.
+.vscode/
