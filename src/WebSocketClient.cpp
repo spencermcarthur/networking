@@ -20,13 +20,17 @@ bool WebSocketClient::connect(const std::string& host, const uint16_t& port, con
     try {
         auto const results = m_resolver.resolve(host, std::to_string(port), ec);  // resolve domain name
         if (ec) {
+#ifdef DEBUG
             std::cerr << "Error resolving domain name: " << ec.message() << std::endl;
+#endif
             return false;
         }
 
         auto ep = net::connect(beast::get_lowest_layer(m_ws), results, ec);  // connect to IP address
         if (ec) {
+#ifdef DEBUG
             std::cerr << "Error connecting to resolved address: " << ec.message() << std::endl;
+#endif
             return false;
         }
 
@@ -41,7 +45,9 @@ bool WebSocketClient::connect(const std::string& host, const uint16_t& port, con
         std::string hostPort = host + ":" + std::to_string(ep.port());
         m_ws.next_layer().handshake(ssl::stream_base::client, ec);  // SSL handshake
         if (ec) {
+#ifdef DEBUG
             std::cerr << "Error completing SSL handshake: " << ec.message() << std::endl;
+#endif
             return false;
         }
 
@@ -55,12 +61,16 @@ bool WebSocketClient::connect(const std::string& host, const uint16_t& port, con
 
         m_ws.handshake(host, path, ec);  // WebSocket handshake
         if (ec) {
+#ifdef DEBUG
             std::cerr << "Error completing WebSocket handshake: " << ec.message() << std::endl;
+#endif
             return false;
         }
 
     } catch (std::exception const& e) {
+#ifdef DEBUG
         std::cerr << "Error: " << e.what() << std::endl;
+#endif
         return false;
     }
 
@@ -73,7 +83,9 @@ bool WebSocketClient::disconnect() {
     m_ws.close(websocket::close_code::normal, ec);
 
     if (net::ssl::error::stream_truncated != ec && ec) {
+#ifdef DEBUG
         std::cerr << "Error: " << ec.message() << std::endl;
+#endif
         return false;
     }
 
@@ -87,7 +99,9 @@ bool WebSocketClient::send(const std::string& message) {
     m_ws.write(net::buffer(message), m_sendErrCode);
 
     if (m_sendErrCode) {
+#ifdef DEBUG
         std::cerr << "Error: " << m_sendErrCode.message() << std::endl;
+#endif
         return false;
     }
 
@@ -102,7 +116,9 @@ bool WebSocketClient::recv(std::string& message) {
     m_ws.read(m_recvBuffer, m_recvErrCode);
 
     if (m_recvErrCode) {
+#ifdef DEBUG
         std::cerr << "Error: " << m_recvErrCode.message() << std::endl;
+#endif
         return false;
     }
 
@@ -117,7 +133,9 @@ bool WebSocketClient::ping(const std::string& message) {
     m_ws.ping(websocket::ping_data(message), m_pingErrCode);
 
     if (m_pingErrCode) {
+#ifdef DEBUG
         std::cerr << "Error pinging: " << m_pingErrCode.message() << std::endl;
+#endif
         return false;
     }
 
@@ -131,7 +149,9 @@ bool WebSocketClient::pong(const std::string& message) {
     m_ws.pong(websocket::ping_data(message), m_pongErrCode);
 
     if (m_pongErrCode) {
+#ifdef DEBUG
         std::cerr << "Error ponging: " << m_pongErrCode.message() << std::endl;
+#endif
         return false;
     }
 
