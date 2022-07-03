@@ -21,6 +21,7 @@ class WebSocketClient
     : public std::enable_shared_from_this<WebSocketClient> {
 public:
     WebSocketClient();
+    virtual ~WebSocketClient();
 
     bool connect(const std::string& host, const uint16_t& port = 443, const std::string& path = "/");
     bool disconnect();

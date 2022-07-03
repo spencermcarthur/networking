@@ -1,12 +1,17 @@
 #include "websocketclient.hpp"
 
 #include <iostream>
+#include <mutex>
 
 WebSocketClient::WebSocketClient()
     : m_sslCtx{ssl::context::tlsv12_client},
       m_resolver{m_ioCtx},
       m_ws{m_ioCtx, m_sslCtx} {
     m_sslCtx.set_default_verify_paths();
+}
+
+WebSocketClient::~WebSocketClient() {
+    std::scoped_lock(m_recvMtx, m_sendMtx, m_pingMtx, m_pongMtx);
 }
 
 bool WebSocketClient::connect(const std::string& host, const uint16_t& port, const std::string& path) {
