@@ -10,12 +10,12 @@
 #include "boost/beast/websocket.hpp"
 #include "boost/beast/websocket/ssl.hpp"
 
-namespace beast = boost::beast;          // from <boost/beast.hpp>
-namespace websocket = beast::websocket;  // from <boost/beast/websocket.hpp>
-namespace net = boost::asio;             // from <boost/asio.hpp>
-namespace ssl = boost::asio::ssl;        // from <boost/asio/ssl.hpp>
-namespace http = beast::http;            // from <boost/beast/http.hpp>
-using tcp = boost::asio::ip::tcp;        // from <boost/asio/ip/tcp.hpp>
+namespace beast = boost::beast;
+namespace websocket = beast::websocket;
+namespace net = boost::asio;
+namespace ssl = boost::asio::ssl;
+namespace http = beast::http;
+using tcp = boost::asio::ip::tcp;
 
 class WebSocketClient
     : public std::enable_shared_from_this<WebSocketClient> {
@@ -28,6 +28,9 @@ public:
     bool send(const std::string& message);
     bool recv(std::string& message);
 
+    bool ping(const std::string& message);
+    bool pong(const std::string& message);
+
 private:
     net::io_context m_ioCtx;
     ssl::context m_sslCtx;
@@ -36,5 +39,13 @@ private:
 
     std::mutex m_sendMtx;
     std::mutex m_recvMtx;
+    std::mutex m_pingMtx;
+    std::mutex m_pongMtx;
+
+    boost::beast::error_code m_sendErrCode;
+    boost::beast::error_code m_recvErrCode;
+    boost::beast::error_code m_pingErrCode;
+    boost::beast::error_code m_pongErrCode;
+
     beast::flat_buffer m_recvBuffer;
 };
