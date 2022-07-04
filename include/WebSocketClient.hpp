@@ -23,14 +23,15 @@ public:
     WebSocketClient();
     virtual ~WebSocketClient();
 
-    bool connect(const std::string& host, const uint16_t& port = 443, const std::string& path = "/");
-    bool disconnect();
+    bool Connect(const std::string& host, const uint16_t& port = 443, const std::string& path = "/");
+    bool Disconnect();
+    bool IsConnected() const { return m_ws.is_open(); }
 
-    bool send(const std::string& message);
-    bool recv(std::string& message);
+    bool Send(const std::string& message);
+    bool Recv(std::string& message);
 
-    bool ping(const std::string& message);
-    bool pong(const std::string& message);
+    bool Ping(const std::string& message);
+    bool Pong(const std::string& message);
 
 private:
     net::io_context m_ioCtx;
@@ -38,7 +39,10 @@ private:
     tcp::resolver m_resolver;
     websocket::stream<beast::ssl_stream<tcp::socket>> m_ws;
 
-    std::mutex m_ioMtx;
+    std::mutex m_sendMtx;
+    std::mutex m_recvMtx;
+    std::mutex m_pingMtx;
+    std::mutex m_pongMtx;
 
     boost::beast::error_code m_sendErrCode;
     boost::beast::error_code m_recvErrCode;
