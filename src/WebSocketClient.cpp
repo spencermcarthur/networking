@@ -11,7 +11,17 @@ WebSocketClient::WebSocketClient()
 }
 
 WebSocketClient::~WebSocketClient() {
-    std::scoped_lock(m_recvMtx, m_sendMtx, m_pingMtx, m_pongMtx);
+    std::scoped_lock _(m_ioMtx);
+
+    beast::error_code ec;
+    if (m_ws.is_open())
+        m_ws.close(websocket::close_code::normal, ec);
+
+    if (net::ssl::error::stream_truncated != ec && ec) {
+#ifdef DEBUG
+        std::cerr << "Error: " << ec.message() << std::endl;
+#endif
+    }
 }
 
 bool WebSocketClient::connect(const std::string& host, const uint16_t& port, const std::string& path) {
@@ -93,7 +103,7 @@ bool WebSocketClient::disconnect() {
 }
 
 bool WebSocketClient::send(const std::string& message) {
-    std::lock_guard<std::mutex> _(m_sendMtx);
+    std::lock_guard<std::mutex> _(m_ioMtx);
     m_sendErrCode.clear();
 
     m_ws.write(net::buffer(message), m_sendErrCode);
@@ -109,7 +119,7 @@ bool WebSocketClient::send(const std::string& message) {
 }
 
 bool WebSocketClient::recv(std::string& message) {
-    std::lock_guard<std::mutex> _(m_recvMtx);
+    std::lock_guard<std::mutex> _(m_ioMtx);
     m_recvErrCode.clear();
     m_recvBuffer.clear();
 
@@ -127,7 +137,7 @@ bool WebSocketClient::recv(std::string& message) {
 }
 
 bool WebSocketClient::ping(const std::string& message) {
-    std::lock_guard<std::mutex> _(m_pingMtx);
+    std::lock_guard<std::mutex> _(m_ioMtx);
     m_pingErrCode.clear();
 
     m_ws.ping(websocket::ping_data(message), m_pingErrCode);
@@ -143,7 +153,7 @@ bool WebSocketClient::ping(const std::string& message) {
 }
 
 bool WebSocketClient::pong(const std::string& message) {
-    std::lock_guard<std::mutex> _(m_pongMtx);
+    std::lock_guard<std::mutex> _(m_ioMtx);
     m_pongErrCode.clear();
 
     m_ws.pong(websocket::ping_data(message), m_pongErrCode);
