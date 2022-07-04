@@ -18,6 +18,7 @@ http::response<http::string_body> HTTPClient::Get(const std::string& host, const
     const uint16_t port = 443;
 
     if (host[host.size() - 1] == '/') host_ = host.substr(0, host.size() - 1);  // strip trailing forward slash
+
     // strip leading https://
     size_t i = host_.find_first_of("://");
     if (i != std::string::npos) {
@@ -25,6 +26,7 @@ http::response<http::string_body> HTTPClient::Get(const std::string& host, const
         host_ = host_.substr(i + 3);
     }
 
+    // set params
     if (!params.empty()) {
         path_ += "?";
         for (const auto& it : params) {
@@ -32,8 +34,10 @@ http::response<http::string_body> HTTPClient::Get(const std::string& host, const
         }
     }
 
+    // init. SSL stream
     beast::ssl_stream<beast::tcp_stream> stream{m_ioCtx, m_sslCtx};
 
+    // set SNI hostname
     if (!SSL_set_tlsext_host_name(stream.native_handle(), host_.c_str())) {
         beast::error_code ec{static_cast<int>(::ERR_get_error()), net::error::get_ssl_category()};
         throw beast::system_error{ec};
@@ -47,10 +51,13 @@ http::response<http::string_body> HTTPClient::Get(const std::string& host, const
     http::request<http::string_body> req{http::verb::get, path_, version};
     req.set(http::field::host, host_);
     req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+
     // set user-defined headers
     if (!headers.empty())
         for (const auto& it : headers) req.set(it.first, it.second);
-    http::write(stream, req);  // send request
+
+    // send request
+    http::write(stream, req);
 
     // receive response
     beast::flat_buffer buffer;
@@ -58,13 +65,14 @@ http::response<http::string_body> HTTPClient::Get(const std::string& host, const
     beast::get_lowest_layer(stream).expires_after(timeout);  // set timeout
     http::read(stream, buffer, res);
 
+    // shutdown stream
     beast::error_code ec;
     stream.shutdown(ec);
     if (net::error::eof != ec && ssl::error::stream_truncated != ec && ec)
         throw beast::system_error{ec};
 
     // handle redirect
-    if (res.result_int() == 301) {
+    if (301 == res.result_int()) {
         std::string newHost;
         if (res.find("Location") != res.end())
             newHost = res.at("Location").to_string();
