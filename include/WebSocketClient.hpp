@@ -38,10 +38,7 @@ private:
     tcp::resolver m_resolver;
     websocket::stream<beast::ssl_stream<tcp::socket>> m_ws;
 
-    std::mutex m_sendMtx;
-    std::mutex m_recvMtx;
-    std::mutex m_pingMtx;
-    std::mutex m_pongMtx;
+    std::mutex m_ioMtx;
 
     boost::beast::error_code m_sendErrCode;
     boost::beast::error_code m_recvErrCode;
