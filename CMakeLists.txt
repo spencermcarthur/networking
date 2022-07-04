@@ -17,21 +17,13 @@ endif()
 find_package(Threads REQUIRED COMPONENTS Threads)
 find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 
-add_library(websocket SHARED ${PROJECT_SOURCE_DIR}/src/WebSocketClient.cpp)
-target_include_directories(websocket PUBLIC ${PROJECT_SOURCE_DIR}/include/networking)
-target_link_libraries(websocket PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
-
-add_library(http SHARED ${PROJECT_SOURCE_DIR}/src/HTTPClient.cpp)
-target_include_directories(http PUBLIC ${PROJECT_SOURCE_DIR}/include/networking)
-target_link_libraries(http PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
-
 add_library(networking SHARED ${PROJECT_SOURCE_DIR}/src/HTTPClient.cpp ${PROJECT_SOURCE_DIR}/src/WebSocketClient.cpp)
 target_include_directories(networking PUBLIC ${PROJECT_SOURCE_DIR}/include/networking)
 target_link_libraries(networking PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
 
 add_subdirectory(tests)
 
-install(TARGETS websocket http networking DESTINATION lib)
+install(TARGETS networking DESTINATION lib)
 install(FILES 
     ${PROJECT_SOURCE_DIR}/include/networking/WebSocketClient.hpp 
     ${PROJECT_SOURCE_DIR}/include/networking/HTTPClient.hpp 
