@@ -9,7 +9,7 @@ protected:
 
 TEST_F(HTTPClientTest, TestSimpleRequest) {
     auto resp = client.Get(URL);
-    EXPECT_NE(resp.body(), "");
+    EXPECT_FALSE("" == resp.body());
 #ifdef DEBUG
     std::cout << resp << std::endl;
 #endif
@@ -17,7 +17,7 @@ TEST_F(HTTPClientTest, TestSimpleRequest) {
 
 TEST_F(HTTPClientTest, TestRequestWithPath) {
     auto resp = client.Get(URL, "/products/BTC-USD");
-    EXPECT_NE(resp.body(), "");
+    EXPECT_FALSE("" == resp.body());
 #ifdef DEBUG
     std::cout << resp << std::endl;
 #endif
@@ -25,7 +25,7 @@ TEST_F(HTTPClientTest, TestRequestWithPath) {
 
 TEST_F(HTTPClientTest, TestRequestWithPathAndParams) {
     auto resp = client.Get(URL, "/products/BTC-USD/book", {{"level", "1"}});
-    EXPECT_NE(resp.body(), "");
+    EXPECT_FALSE("" == resp.body());
 #ifdef DEBUG
     std::cout << resp << std::endl;
 #endif

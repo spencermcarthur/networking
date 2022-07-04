@@ -32,7 +32,7 @@ TEST_F(WebSocketClientTest, TestRecv) {
     client.Send(SEND_MESSAGE);
 
     EXPECT_TRUE(client.Recv(RECV_MESSAGE));
-    EXPECT_NE("", RECV_MESSAGE);
+    EXPECT_FALSE("" == RECV_MESSAGE);
 }
 
 TEST_F(WebSocketClientTest, TestDisconnect) {
