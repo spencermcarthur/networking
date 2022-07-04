@@ -8,10 +8,10 @@ enable_testing()
 
 add_executable(TestWebSocketClient TestWebSocketClient.cpp)
 target_include_directories(TestWebSocketClient PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(TestWebSocketClient websocket gtest)
+target_link_libraries(TestWebSocketClient networking gtest)
 add_test(NAME TestWebSocketClient COMMAND TestWebSocketClient)
 
 add_executable(TestHTTPClient TestHTTPClient.cpp)
 target_include_directories(TestHTTPClient PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(TestHTTPClient http gtest)
+target_link_libraries(TestHTTPClient networking gtest)
 add_test(NAME TestHTTPClient COMMAND TestHTTPClient)
