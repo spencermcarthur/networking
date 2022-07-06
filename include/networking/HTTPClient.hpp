@@ -49,7 +49,7 @@ protected:
     std::string m_host;
     uint16_t m_port;
 
-    http::response<http::string_body> response;
-    http::request<http::string_body> request;
-    beast::flat_buffer buffer;
+    http::response<http::string_body> m_response;
+    http::request<http::string_body> m_request;
+    beast::flat_buffer m_recvBuffer;
 };
