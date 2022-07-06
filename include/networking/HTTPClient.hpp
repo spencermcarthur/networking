@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,7 @@ using tcp = net::ip::tcp;
 class HTTPClient : public std::enable_shared_from_this<HTTPClient> {
 public:
     HTTPClient();
+    ~HTTPClient();
 
     bool Connect(const std::string& host, const uint16_t& port = 443);
     bool Disconnect();
@@ -41,6 +43,7 @@ protected:
     tcp::resolver m_resolver;
     beast::ssl_stream<beast::tcp_stream> m_stream;
 
+    std::mutex m_ioMtx;
     std::atomic_bool m_connected;
     std::string m_host;
 };
