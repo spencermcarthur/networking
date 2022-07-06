@@ -30,6 +30,7 @@ public:
 
     bool Connect(const std::string& host, const uint16_t& port = 443);
     bool Disconnect();
+    bool IsConnected() const;
 
     http::response<http::string_body> Get(
         const std::string& path = "/",
@@ -46,4 +47,9 @@ protected:
     std::mutex m_ioMtx;
     std::atomic_bool m_connected;
     std::string m_host;
+    uint16_t m_port;
+
+    http::response<http::string_body> response;
+    http::request<http::string_body> request;
+    beast::flat_buffer buffer;
 };
