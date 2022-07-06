@@ -22,6 +22,7 @@ target_include_directories(networking PUBLIC ${PROJECT_SOURCE_DIR}/include/netwo
 target_link_libraries(networking PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
 
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
 
 install(TARGETS networking DESTINATION lib)
 install(FILES 
