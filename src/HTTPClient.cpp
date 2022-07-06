@@ -24,11 +24,13 @@ HTTPClient::HTTPClient()
 }
 
 HTTPClient::~HTTPClient() {
-    if (m_connected) Disconnect();
+    if (m_connected)
+        Disconnect();
 }
 
 bool HTTPClient::Connect(const std::string& host, const uint16_t& port) {
-    if (m_connected) Disconnect();
+    if (m_connected)
+        Disconnect();
 
     std::lock_guard<std::mutex> lockIo(m_ioMtx);
 
@@ -40,12 +42,14 @@ bool HTTPClient::Connect(const std::string& host, const uint16_t& port) {
     m_port = port;
 
     // strip trailing forward slash
-    if (m_host[m_host.size() - 1] == '/') m_host = m_host.substr(0, m_host.size() - 1);
+    if (m_host[m_host.size() - 1] == '/')
+        m_host = m_host.substr(0, m_host.size() - 1);
 
     // strip scheme
     size_t i = m_host.find_first_of("://");
     if (i != std::string::npos) {
-        if (m_host.substr(0, i) == "http") throw std::runtime_error("Non-SSL connection not supported");
+        if (m_host.substr(0, i) == "http")
+            throw std::runtime_error("Non-SSL connection not supported");
         m_host = m_host.substr(i + 3);
     }
 
@@ -113,13 +117,13 @@ http::response<http::string_body> HTTPClient::Get(const std::string& path,
                                                   const std::vector<std::pair<std::string, std::string>>& headers,
                                                   const std::chrono::seconds& timeout) {
     std::lock_guard<std::mutex> lockIo(m_ioMtx);
-    response.clear();
 
+    m_response.clear();
     if (!m_connected) {
 #ifdef DEBUG
         std::cerr << "Not connected" << std::endl;
 #endif
-        return response;
+        return m_response;
     }
 
     // set params
@@ -128,29 +132,32 @@ http::response<http::string_body> HTTPClient::Get(const std::string& path,
         path_ += "?";
         for (const auto& it : params) {
             path_ += it.first + "=" + it.second;
-            if (it.first != params.rbegin()->first) path_ += "&";
+            if (it.first != params.rbegin()->first)
+                path_ += "&";
         }
     }
 
     // build request
-    request.clear();
-    request.method(http::verb::get);
-    request.target(path_);
-    request.version(11);
-    request.set(http::field::host, m_host);
-    request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    m_request.clear();
+    m_request.method(http::verb::get);
+    m_request.target(path_);
+    m_request.version(11);
+    m_request.keep_alive(true);
+    m_request.set(http::field::host, m_host);
+    m_request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
     // set user-defined headers
     if (!headers.empty())
-        for (const auto& it : headers) request.set(it.first, it.second);
+        for (const auto& it : headers)
+            m_request.set(it.first, it.second);
 
     // send request
-    http::write(m_stream, request);
+    http::write(m_stream, m_request);
 
     // receive response
-    buffer.clear();
+    m_recvBuffer.clear();
     beast::get_lowest_layer(m_stream).expires_after(timeout);  // set timeout
-    http::read(m_stream, buffer, response);
+    http::read(m_stream, m_recvBuffer, m_response);
 
-    return response;
+    return m_response;
 }
