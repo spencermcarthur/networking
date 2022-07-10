@@ -43,7 +43,7 @@ TEST_F(WebSocketClientTest, TestDisconnect) {
     EXPECT_FALSE(client.IsConnected());
 }
 
-TEST_F(WebSocketClientTest, FullUpTest) {
+TEST_F(WebSocketClientTest, FullTest) {
     EXPECT_FALSE(client.Send(SEND_MESSAGE));
     EXPECT_FALSE(client.Recv(RECV_MESSAGE));
 
