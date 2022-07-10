@@ -1,4 +1,4 @@
-#include "WebSocketClient.hpp"
+#include "networking/WebSocketClient.hpp"
 #include "gtest/gtest.h"
 
 class WebSocketClientTest : public ::testing::Test {

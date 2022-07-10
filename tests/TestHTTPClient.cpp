@@ -1,6 +1,6 @@
 #include <thread>
 
-#include "HTTPClient.hpp"
+#include "networking/HTTPClient.hpp"
 #include "gtest/gtest.h"
 
 class HTTPClientTest : public ::testing::Test {
