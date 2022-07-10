@@ -15,11 +15,19 @@ else()
 endif()
 
 find_package(Threads REQUIRED COMPONENTS Threads)
+find_package(Boost REQUIRED)
 find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
 
-add_library(networking SHARED ${PROJECT_SOURCE_DIR}/src/HTTPClient.cpp ${PROJECT_SOURCE_DIR}/src/WebSocketClient.cpp)
-target_include_directories(networking PUBLIC ${PROJECT_SOURCE_DIR}/include/networking)
-target_link_libraries(networking PUBLIC Threads::Threads OpenSSL::SSL OpenSSL::Crypto)
+add_library(networking SHARED 
+    ${PROJECT_SOURCE_DIR}/src/HTTPClient.cpp
+    ${PROJECT_SOURCE_DIR}/src/WebSocketClient.cpp)
+target_include_directories(networking PUBLIC 
+    include 
+    ${Boost_INCLUDE_DIR})
+target_link_libraries(networking PUBLIC 
+    Threads::Threads 
+    OpenSSL::SSL 
+    OpenSSL::Crypto)
 
 add_subdirectory(tests)
 
