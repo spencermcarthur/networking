@@ -1,4 +1,4 @@
-#include "HTTPClient.hpp"
+#include "networking/HTTPClient.hpp"
 
 class HTTPError : public std::exception {
 public:
